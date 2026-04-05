@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { SeverityBadge } from '@/components/ui/severity-badge';
 
 const defaultInput = {
   month: new Date().getMonth() + 1,
@@ -165,7 +166,7 @@ export default function ClimateForecastPage() {
                     <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Temperature</p>
                     <p className="mt-4 text-5xl font-semibold text-white">{data.temperature.prediction.toFixed(1)}°C</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs uppercase px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">{data.temperature.severity}</span>
+                      <SeverityBadge severity={data.temperature.severity} confidence={data.temperature.confidence} />
                       <span className="text-xs text-slate-400">{(data.temperature.confidence * 100).toFixed(0)}% confidence</span>
                     </div>
                     <p className="mt-2 text-sm text-slate-400">Predicted next-day air temperature with severity assessment.</p>
@@ -174,7 +175,7 @@ export default function ClimateForecastPage() {
                     <p className="text-sm uppercase tracking-[0.3em] text-sky-300">Rainfall</p>
                     <p className="mt-4 text-5xl font-semibold text-white">{data.rainfall.prediction.toFixed(1)} mm</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs uppercase px-2 py-1 rounded bg-sky-500/20 text-sky-300">{data.rainfall.severity}</span>
+                      <SeverityBadge severity={data.rainfall.severity} confidence={data.rainfall.confidence} />
                       <span className="text-xs text-slate-400">{(data.rainfall.confidence * 100).toFixed(0)}% confidence</span>
                     </div>
                     <p className="mt-2 text-sm text-slate-400">Forecasted precipitation intensity with risk level.</p>
@@ -183,7 +184,7 @@ export default function ClimateForecastPage() {
                     <p className="text-sm uppercase tracking-[0.3em] text-rose-300">AQI</p>
                     <p className="mt-4 text-5xl font-semibold text-white">{data.aqi.prediction.toFixed(0)}</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs uppercase px-2 py-1 rounded bg-rose-500/20 text-rose-300">{data.aqi.severity}</span>
+                      <SeverityBadge severity={data.aqi.severity} confidence={data.aqi.confidence} />
                       <span className="text-xs text-slate-400">{(data.aqi.confidence * 100).toFixed(0)}% confidence</span>
                     </div>
                     <p className="mt-2 text-sm text-slate-400">Air quality forecast with severity assessment.</p>

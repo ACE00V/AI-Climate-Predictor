@@ -8,6 +8,14 @@ import {
   predictTemperature,
   predictRainfall,
   predictAQI,
+  predictTemperatureWithSeverity,
+  predictRainfallWithSeverity,
+  predictAQIWithSeverity,
+  predictCycloneRiskWithSeverity,
+  predictStormSurgeRiskWithSeverity,
+  predictErosionRiskWithSeverity,
+  predictPollutionRiskWithSeverity,
+  predictAllClimateMetricsWithSeverity,
 } from '../../lib/climate-model';
 
 // Generate realistic cyclone sensor data
@@ -356,37 +364,27 @@ export const predictionsRouter = createTRPCRouter({
             so2: z.number().min(0).max(150).default(8),
         }))
         .query(async ({ input }) => {
-            return {
-                temperature: predictTemperature({
-                    month: input.month,
-                    elevation: input.elevation,
-                    humidity: input.humidity,
-                    pressure: input.pressure,
-                    windSpeed: input.windSpeed,
-                    cloudCover: input.cloudCover,
-                    seaSurfaceTemp: input.seaSurfaceTemp,
-                    previousTemp: input.previousTemp,
-                    dayOfYear: input.month * 30,
-                }),
-                rainfall: predictRainfall({
-                    month: input.month,
-                    humidity: input.humidity,
-                    pressure: input.pressure,
-                    windSpeed: input.windSpeed,
-                    cloudCover: input.cloudCover,
-                    temperature: input.previousTemp,
-                    elevation: input.elevation,
-                }),
-                aqi: predictAQI({
-                    pm25: input.pm25,
-                    pm10: input.pm10,
-                    no2: input.no2,
-                    so2: input.so2,
-                    temperature: input.previousTemp,
-                    humidity: input.humidity,
-                    windSpeed: input.windSpeed,
-                    month: input.month,
-                }),
-            };
+            return predictAllClimateMetricsWithSeverity({
+                month: input.month,
+                elevation: input.elevation,
+                humidity: input.humidity,
+                pressure: input.pressure,
+                windSpeed: input.windSpeed,
+                cloudCover: input.cloudCover,
+                seaSurfaceTemp: input.seaSurfaceTemp,
+                previousTemp: input.previousTemp,
+                dayOfYear: input.month * 30,
+                pm25: input.pm25,
+                pm10: input.pm10,
+                no2: input.no2,
+                so2: input.so2,
+                speed: 30, // Default values for risk predictions
+                centralPressure: 1000,
+                convectiveActivity: 0.5,
+                vorticity: 0.0005,
+                verticalShear: 15,
+                cloudTopTemp: -50,
+                precipitation: 20,
+            });
         }),
 });

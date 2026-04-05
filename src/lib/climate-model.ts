@@ -344,6 +344,46 @@ const stormSurgeRiskModel = buildStormSurgeRiskModel();
 const erosionRiskModel = buildErosionRiskModel();
 const pollutionRiskModel = buildPollutionRiskModel();
 
+// Severity thresholds for different prediction types
+const severityThresholds = {
+  temperature: { LOW: 20, MODERATE: 30, HIGH: 35, EXTREME: 40 },
+  rainfall: { LOW: 10, MODERATE: 50, HIGH: 100, EXTREME: 200 },
+  aqi: { LOW: 50, MODERATE: 100, HIGH: 150, EXTREME: 300 },
+  cyclone_risk: { LOW: 0.2, MODERATE: 0.4, HIGH: 0.6, EXTREME: 0.8 },
+  storm_surge_risk: { LOW: 0.15, MODERATE: 0.35, HIGH: 0.55, EXTREME: 0.75 },
+  erosion_risk: { LOW: 0.2, MODERATE: 0.4, HIGH: 0.6, EXTREME: 0.8 },
+  pollution_risk: { LOW: 0.2, MODERATE: 0.4, HIGH: 0.6, EXTREME: 0.8 }
+};
+
+function determineSeverity(predictionType: keyof typeof severityThresholds, value: number): 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME' {
+  const thresholds = severityThresholds[predictionType];
+
+  if (predictionType.includes('risk')) {
+    // Probability-based severity for risk models
+    if (value >= thresholds.EXTREME) return 'EXTREME';
+    if (value >= thresholds.HIGH) return 'HIGH';
+    if (value >= thresholds.MODERATE) return 'MODERATE';
+    return 'LOW';
+  } else {
+    // Value-based severity for direct measurements
+    if (value >= thresholds.EXTREME) return 'EXTREME';
+    if (value >= thresholds.HIGH) return 'HIGH';
+    if (value >= thresholds.MODERATE) return 'MODERATE';
+    return 'LOW';
+  }
+}
+
+function calculateConfidence(predictionType: keyof typeof severityThresholds, value: number, severity: string): number {
+  const thresholds = severityThresholds[predictionType];
+  const severityThreshold = thresholds[severity as keyof typeof thresholds] as number;
+
+  // Calculate confidence based on distance from threshold
+  const distance = Math.abs(value - severityThreshold);
+  const maxDistance = Math.max(value, severityThreshold, 1); // Avoid division by zero
+
+  return Math.min(0.95, Math.max(0.5, 1 - (distance / maxDistance)));
+}
+
 export function predictTemperature(input: {
   month: number;
   elevation: number;
@@ -502,4 +542,221 @@ export function predictPollutionRisk(input: {
     input.temperature,
   ];
   return clamp(predictWithModel(pollutionRiskModel, features), 0, 1);
+}
+
+// Severity prediction functions
+export function predictTemperatureWithSeverity(input: {
+  month: number;
+  elevation: number;
+  humidity: number;
+  pressure: number;
+  windSpeed: number;
+  cloudCover: number;
+  seaSurfaceTemp: number;
+  previousTemp: number;
+  dayOfYear: number;
+}) {
+  const prediction = predictTemperature(input);
+  const severity = determineSeverity('temperature', prediction);
+  const confidence = calculateConfidence('temperature', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+export function predictRainfallWithSeverity(input: {
+  month: number;
+  humidity: number;
+  pressure: number;
+  windSpeed: number;
+  cloudCover: number;
+  temperature: number;
+  elevation: number;
+}) {
+  const prediction = predictRainfall(input);
+  const severity = determineSeverity('rainfall', prediction);
+  const confidence = calculateConfidence('rainfall', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+export function predictAQIWithSeverity(input: {
+  pm25: number;
+  pm10: number;
+  no2: number;
+  so2: number;
+  temperature: number;
+  humidity: number;
+  windSpeed: number;
+  month: number;
+}) {
+  const prediction = predictAQI(input);
+  const severity = determineSeverity('aqi', prediction);
+  const confidence = calculateConfidence('aqi', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+export function predictCycloneRiskWithSeverity(input: {
+  speed: number;
+  centralPressure: number;
+  seaSurfaceTemp: number;
+  humidity: number;
+  convectiveActivity: number;
+  vorticity: number;
+  verticalShear: number;
+  cloudTopTemp: number;
+  precipitation: number;
+}) {
+  const prediction = predictCycloneProbability(input);
+  const severity = determineSeverity('cyclone_risk', prediction);
+  const confidence = calculateConfidence('cyclone_risk', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+export function predictStormSurgeRiskWithSeverity(input: {
+  waterLevel: number;
+  anomaly: number;
+  rateOfRise: number;
+  waveHeight: number;
+  windSpeed: number;
+  pressure: number;
+  tide: number;
+}) {
+  const prediction = predictStormSurgeRisk(input);
+  const severity = determineSeverity('storm_surge_risk', prediction);
+  const confidence = calculateConfidence('storm_surge_risk', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+export function predictErosionRiskWithSeverity(input: {
+  erosionRate: number;
+  waveEnergy: number;
+  beachWidth: number;
+  protectionRating: number;
+  vegetationCover: number;
+  seaLevelRise: number;
+  stormFrequency: number;
+}) {
+  const prediction = predictErosionRisk(input);
+  const severity = determineSeverity('erosion_risk', prediction);
+  const confidence = calculateConfidence('erosion_risk', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+export function predictPollutionRiskWithSeverity(input: {
+  turbidity: number;
+  dissolvedOxygen: number;
+  nitrate: number;
+  phosphate: number;
+  hydrocarbons: number;
+  biodiversity: number;
+  temperature: number;
+}) {
+  const prediction = predictPollutionRisk(input);
+  const severity = determineSeverity('pollution_risk', prediction);
+  const confidence = calculateConfidence('pollution_risk', prediction, severity);
+
+  return {
+    prediction,
+    severity,
+    confidence
+  };
+}
+
+// Combined severity prediction for all climate metrics
+export function predictAllClimateMetricsWithSeverity(input: {
+  // Temperature inputs
+  month: number;
+  elevation: number;
+  humidity: number;
+  pressure: number;
+  windSpeed: number;
+  cloudCover: number;
+  seaSurfaceTemp: number;
+  previousTemp: number;
+  dayOfYear: number;
+  // AQI inputs
+  pm25: number;
+  pm10: number;
+  no2: number;
+  so2: number;
+  // Cyclone inputs
+  speed: number;
+  centralPressure: number;
+  convectiveActivity: number;
+  vorticity: number;
+  verticalShear: number;
+  cloudTopTemp: number;
+  precipitation: number;
+}) {
+  return {
+    temperature: predictTemperatureWithSeverity({
+      month: input.month,
+      elevation: input.elevation,
+      humidity: input.humidity,
+      pressure: input.pressure,
+      windSpeed: input.windSpeed,
+      cloudCover: input.cloudCover,
+      seaSurfaceTemp: input.seaSurfaceTemp,
+      previousTemp: input.previousTemp,
+      dayOfYear: input.dayOfYear,
+    }),
+    rainfall: predictRainfallWithSeverity({
+      month: input.month,
+      humidity: input.humidity,
+      pressure: input.pressure,
+      windSpeed: input.windSpeed,
+      cloudCover: input.cloudCover,
+      temperature: input.previousTemp,
+      elevation: input.elevation,
+    }),
+    aqi: predictAQIWithSeverity({
+      pm25: input.pm25,
+      pm10: input.pm10,
+      no2: input.no2,
+      so2: input.so2,
+      temperature: input.previousTemp,
+      humidity: input.humidity,
+      windSpeed: input.windSpeed,
+      month: input.month,
+    }),
+    cycloneRisk: predictCycloneRiskWithSeverity({
+      speed: input.speed,
+      centralPressure: input.centralPressure,
+      seaSurfaceTemp: input.seaSurfaceTemp,
+      humidity: input.humidity,
+      convectiveActivity: input.convectiveActivity,
+      vorticity: input.vorticity,
+      verticalShear: input.verticalShear,
+      cloudTopTemp: input.cloudTopTemp,
+      precipitation: input.precipitation,
+    }),
+  };
 }

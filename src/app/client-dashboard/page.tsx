@@ -48,9 +48,9 @@ export default function ClientDashboardPage() {
     if (!data) return [];
     return Array.from({ length: 7 }, (_, index) => ({
       day: `Day ${index + 1}`,
-      temperature: Number((data.temperature + Math.sin(index / 2) * 1.8).toFixed(1)),
-      rainfall: Number(Math.max(0, data.rainfall + Math.cos(index / 2) * 4).toFixed(1)),
-      aqi: Number(Math.max(0, data.aqi + Math.sin(index / 3) * 7).toFixed(0)),
+      temperature: Number((data.temperature.prediction + Math.sin(index / 2) * 1.8).toFixed(1)),
+      rainfall: Number(Math.max(0, data.rainfall.prediction + Math.cos(index / 2) * 4).toFixed(1)),
+      aqi: Number(Math.max(0, data.aqi.prediction + Math.sin(index / 3) * 7).toFixed(0)),
     }));
   }, [data]);
 
@@ -93,15 +93,39 @@ export default function ClientDashboardPage() {
               <CardContent className="space-y-4">
                 <div className="rounded-3xl bg-slate-900/80 p-4">
                   <p className="text-sm text-slate-500">Temperature</p>
-                  <p className="mt-2 text-4xl font-semibold text-cyan-300">{data ? `${data.temperature.toFixed(1)}°C` : "--"}</p>
+                  <p className="mt-2 text-4xl font-semibold text-cyan-300">{data ? `${data.temperature.prediction.toFixed(1)}°C` : "--"}</p>
+                  {data && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant={data.temperature.severity === 'LOW' ? 'secondary' : data.temperature.severity === 'MODERATE' ? 'default' : 'destructive'} className="text-xs">
+                        {data.temperature.severity.toUpperCase()}
+                      </Badge>
+                      <span className="text-xs text-slate-400">Confidence: {(data.temperature.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                  )}
                 </div>
                 <div className="rounded-3xl bg-slate-900/80 p-4">
                   <p className="text-sm text-slate-500">Rainfall</p>
-                  <p className="mt-2 text-4xl font-semibold text-sky-300">{data ? `${data.rainfall.toFixed(1)} mm` : "--"}</p>
+                  <p className="mt-2 text-4xl font-semibold text-sky-300">{data ? `${data.rainfall.prediction.toFixed(1)} mm` : "--"}</p>
+                  {data && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant={data.rainfall.severity === 'LOW' ? 'secondary' : data.rainfall.severity === 'MODERATE' ? 'default' : 'destructive'} className="text-xs">
+                        {data.rainfall.severity.toUpperCase()}
+                      </Badge>
+                      <span className="text-xs text-slate-400">Confidence: {(data.rainfall.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                  )}
                 </div>
                 <div className="rounded-3xl bg-slate-900/80 p-4">
                   <p className="text-sm text-slate-500">AQI</p>
-                  <p className="mt-2 text-4xl font-semibold text-emerald-300">{data ? `${data.aqi.toFixed(0)}` : "--"}</p>
+                  <p className="mt-2 text-4xl font-semibold text-emerald-300">{data ? `${data.aqi.prediction.toFixed(0)}` : "--"}</p>
+                  {data && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant={data.aqi.severity === 'LOW' ? 'secondary' : data.aqi.severity === 'MODERATE' ? 'default' : 'destructive'} className="text-xs">
+                        {data.aqi.severity.toUpperCase()}
+                      </Badge>
+                      <span className="text-xs text-slate-400">Confidence: {(data.aqi.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -221,15 +245,33 @@ export default function ClientDashboardPage() {
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div className="rounded-3xl bg-slate-900/80 p-4">
                         <p className="text-sm text-slate-400">Predicted Temp</p>
-                        <p className="mt-2 text-2xl font-semibold text-cyan-300">{data.temperature.toFixed(1)}°C</p>
+                        <p className="mt-2 text-2xl font-semibold text-cyan-300">{data.temperature.prediction.toFixed(1)}°C</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant={data.temperature.severity === 'LOW' ? 'secondary' : data.temperature.severity === 'MODERATE' ? 'default' : 'destructive'} className="text-xs">
+                            {data.temperature.severity.toUpperCase()}
+                          </Badge>
+                          <span className="text-xs text-slate-500">{(data.temperature.confidence * 100).toFixed(0)}% confidence</span>
+                        </div>
                       </div>
                       <div className="rounded-3xl bg-slate-900/80 p-4">
                         <p className="text-sm text-slate-400">Predicted Rainfall</p>
-                        <p className="mt-2 text-2xl font-semibold text-sky-300">{data.rainfall.toFixed(1)} mm</p>
+                        <p className="mt-2 text-2xl font-semibold text-sky-300">{data.rainfall.prediction.toFixed(1)} mm</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant={data.rainfall.severity === 'LOW' ? 'secondary' : data.rainfall.severity === 'MODERATE' ? 'default' : 'destructive'} className="text-xs">
+                            {data.rainfall.severity.toUpperCase()}
+                          </Badge>
+                          <span className="text-xs text-slate-500">{(data.rainfall.confidence * 100).toFixed(0)}% confidence</span>
+                        </div>
                       </div>
                       <div className="rounded-3xl bg-slate-900/80 p-4">
                         <p className="text-sm text-slate-400">Predicted AQI</p>
-                        <p className="mt-2 text-2xl font-semibold text-emerald-300">{data.aqi.toFixed(0)}</p>
+                        <p className="mt-2 text-2xl font-semibold text-emerald-300">{data.aqi.prediction.toFixed(0)}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant={data.aqi.severity === 'LOW' ? 'secondary' : data.aqi.severity === 'MODERATE' ? 'default' : 'destructive'} className="text-xs">
+                            {data.aqi.severity.toUpperCase()}
+                          </Badge>
+                          <span className="text-xs text-slate-500">{(data.aqi.confidence * 100).toFixed(0)}% confidence</span>
+                        </div>
                       </div>
                     </div>
 
@@ -268,7 +310,7 @@ export default function ClientDashboardPage() {
                 <div className="space-y-3 rounded-3xl bg-slate-900/80 p-5">
                   <p className="text-white text-base font-semibold">What it predicts</p>
                   <p className="text-sm leading-6 text-slate-400">
-                    The response includes next-day predictions for temperature, total rainfall, and air quality index. These values are computed from the model weights and returned as the forecast output.
+                    The response includes next-day predictions for temperature, total rainfall, and air quality index, along with severity levels (low/moderate/high/extreme) and confidence scores. These values are computed from the model weights and returned as the forecast output with risk assessment.
                   </p>
                 </div>
                 <div className="space-y-3 rounded-3xl bg-slate-900/80 p-5">
@@ -280,7 +322,9 @@ export default function ClientDashboardPage() {
                 <div className="rounded-3xl bg-slate-900/80 p-5 text-sm text-slate-400">
                   <p className="font-semibold text-white">Response structure</p>
                   <ul className="list-disc space-y-2 pl-5 pt-2">
-                    <li>The endpoint returns `temperature`, `rainfall`, and `aqi`.</li>
+                    <li>The endpoint returns `temperature`, `rainfall`, and `aqi` objects with `prediction`, `severity`, and `confidence` fields.</li>
+                    <li>Severity levels indicate risk: low (green), moderate (yellow), high (orange), extreme (red).</li>
+                    <li>Confidence scores show model certainty in the prediction and severity assessment.</li>
                     <li>Trend charts are derived from the model output plus a small smoothing function.</li>
                     <li>Forecast values are refreshed whenever the scenario inputs are updated.</li>
                   </ul>

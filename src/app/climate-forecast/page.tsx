@@ -163,18 +163,30 @@ export default function ClimateForecastPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="rounded-3xl border border-slate-700 bg-slate-950/60 p-5">
                     <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Temperature</p>
-                    <p className="mt-4 text-5xl font-semibold text-white">{data.temperature.toFixed(1)}°C</p>
-                    <p className="mt-2 text-sm text-slate-400">Predicted next-day air temperature.</p>
+                    <p className="mt-4 text-5xl font-semibold text-white">{data.temperature.prediction.toFixed(1)}°C</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs uppercase px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">{data.temperature.severity}</span>
+                      <span className="text-xs text-slate-400">{(data.temperature.confidence * 100).toFixed(0)}% confidence</span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-400">Predicted next-day air temperature with severity assessment.</p>
                   </div>
                   <div className="rounded-3xl border border-slate-700 bg-slate-950/60 p-5">
                     <p className="text-sm uppercase tracking-[0.3em] text-sky-300">Rainfall</p>
-                    <p className="mt-4 text-5xl font-semibold text-white">{data.rainfall.toFixed(1)} mm</p>
-                    <p className="mt-2 text-sm text-slate-400">Forecasted precipitation intensity.</p>
+                    <p className="mt-4 text-5xl font-semibold text-white">{data.rainfall.prediction.toFixed(1)} mm</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs uppercase px-2 py-1 rounded bg-sky-500/20 text-sky-300">{data.rainfall.severity}</span>
+                      <span className="text-xs text-slate-400">{(data.rainfall.confidence * 100).toFixed(0)}% confidence</span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-400">Forecasted precipitation intensity with risk level.</p>
                   </div>
                   <div className="rounded-3xl border border-slate-700 bg-slate-950/60 p-5">
                     <p className="text-sm uppercase tracking-[0.3em] text-rose-300">AQI</p>
-                    <p className="mt-4 text-5xl font-semibold text-white">{data.aqi.toFixed(0)}</p>
-                    <p className="mt-2 text-sm text-slate-400">Air quality forecast based on pollutant levels.</p>
+                    <p className="mt-4 text-5xl font-semibold text-white">{data.aqi.prediction.toFixed(0)}</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs uppercase px-2 py-1 rounded bg-rose-500/20 text-rose-300">{data.aqi.severity}</span>
+                      <span className="text-xs text-slate-400">{(data.aqi.confidence * 100).toFixed(0)}% confidence</span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-400">Air quality forecast with severity assessment.</p>
                   </div>
                 </div>
               ) : (
